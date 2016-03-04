@@ -1,0 +1,4 @@
+
+var macro = require('./lib');
+macro.metadata = require('./plugin');
+module.exports = macro;

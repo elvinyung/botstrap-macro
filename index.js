@@ -317,11 +317,13 @@ var macro = function macro(argv, message, response, config, logger) {
       }
     });
   }
-  else if (subcmd === 'list') {
-    var expand = (argv.indexOf('--expand') !== -1);
+  else if (subcmd === 'list' || subcmd === 'expand') {
+    var expand = (subcmd === expand);
     var resBody = Object.keys(macros)
       .filter(function(key) {
-        return (!expand || argv.length < 4 || argv.slice(3).indexOf(key) !== -1);
+        return (!expand || argv.slice(3).some(function(prefix) {
+          key.startsWith(prefix);
+        }));
       })
       .map(function(key) {
         if (!expand) return key;
@@ -337,6 +339,22 @@ var macro = function macro(argv, message, response, config, logger) {
 
     resBody = resBody || errMsgs.noMacros;
     response.end(resBody);
+  }
+  else if (subcmd === 'expand') {
+    var resBody = argv.slice(3).map(function(key) {
+      return [key, macros[key]];
+    }).filter(function(item) {
+      return typeof item[1] !== 'undefined';
+    }).map(function(item) {
+      var name = item[0],
+        template = item[1];
+      return lfmt.format('{{name}} - ```{{template}}```', {
+        name: key,
+        template: typeof template === 'function' ?
+          lfmt.format('<builtin - {{description}}>', template) :
+          template
+      });
+    })
   }
   else if (subcmd === 'unset') {
     var name = argv[2];
