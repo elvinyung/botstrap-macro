@@ -22,6 +22,9 @@ For the record, it used to be \`\`\`{{template}}\`\`\``
 
 var builtInMacros = require('./lib/builtins');
 
+// TODO: Actually use tokens
+var Tokenizer = require('./lib/tokenizer');
+var tokenizeExpr = Tokenizer.tokenizeExprToStr;
 const OPENBRK = '$(';
 const CLOSEBRK = ')';
 
@@ -113,14 +116,6 @@ var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack) {
       cb(null, resultSrc);
     }
   }
-};
-
-
-var tokenizeExpr = function tokenizeExpr(expr) {
-  return expr.split(/(\$\(|\)|\s)/g)
-    .filter(function(s) {
-      return s.trim().length
-    });
 };
 
 var parseTokens = function parseTokens(tokens, callee, cb, callStack) {
