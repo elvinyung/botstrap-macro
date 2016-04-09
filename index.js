@@ -17,7 +17,8 @@ var errMsgs = {
   nameReserved: 'Can\'t overwrite a builtin macro.',
   emptyResponse: '<result was empty>',
   removedMacro: `It is done. The macro \`{{name}}\` will trouble you no more.
-For the record, it used to be \`\`\`{{template}}\`\`\``
+For the record, it used to be \`\`\`{{template}}\`\`\``,
+  unchangedMacro: 'Nothing changed.'
 };
 
 var builtInMacros = require('./lib/builtins');
@@ -216,6 +217,11 @@ var macro = function macro(argv, message, response, config, logger) {
     var template = unescapeLinks(argv.slice(3).join(' '));
 
     var oldTemplate = macros[name];
+    if (oldTemplate === template) {
+      response.end(errMsgs.unchangedMacro);
+      return;
+    }
+
     addMacro(name, template, function(err) {
       if (!err) {
         if (template.length >= 0) {
