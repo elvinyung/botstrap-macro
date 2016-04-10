@@ -11,7 +11,12 @@
     "list": {
       "name": "list",
       "description": "List or search for macros",
-      "usage": "macro list [--expand|-e] {names...}"
+      "usage": "macro list [--expand {names...}]"
+    },
+    "expand": {
+      "name": "expand",
+      "description": "Show macro templates by names",
+      "usage": "macro expand {names...}"
     }
   }
 }
