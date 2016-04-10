@@ -13,7 +13,7 @@ var errMsgs = {
   cantBeEmpty: 'Macro can\'t be empty!',
   cantBeRecursive: 'Macro can\'t be recursive!',
   badBrackets: 'Macro has mismatched brackets!',
-  noMacros: 'There are no macros.',
+  noMacros: 'There are no matching macros.',
   nameReserved: 'Can\'t overwrite a builtin macro.',
   emptyResponse: '<result was empty>',
   removedMacro: `It is done. The macro \`{{name}}\` will trouble you no more.
@@ -244,14 +244,14 @@ var macro = function macro(argv, message, response, config, logger) {
       }
     });
   }
-  else if (subcmd === 'list') {
-    var expand = (argv.indexOf('--expand') !== -1);
+  else if (subcmd == 'expand' ||
+    (subcmd === 'list' && argv.indexOf('--expand') !== -1)) {
+    var query = argv.slice(subcmd == 'expand' ? 2 : 3);
     var resBody = Object.keys(macros)
       .filter(function(key) {
-        return (!expand || argv.length < 4 || argv.slice(3).indexOf(key) !== -1);
+        return query.indexOf(key) !== -1;
       })
       .map(function(key) {
-        if (!expand) return key;
         var macro = macros[key];
         return lfmt.format('{{name}} - ```{{template}}```', {
           name: key,
@@ -260,9 +260,13 @@ var macro = function macro(argv, message, response, config, logger) {
             macro
         });
       })
-      .join(expand ? '\n': ', ');
+      .join('\n');
 
     resBody = resBody || errMsgs.noMacros;
+    response.end(resBody);
+  }
+  else if (subcmd === 'list') {
+    var resBody = Object.keys(macros).join(', ');
     response.end(resBody);
   }
   else if (subcmd === 'unset') {
