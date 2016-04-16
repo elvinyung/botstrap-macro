@@ -246,10 +246,17 @@ var macro = function macro(argv, message, response, config, logger) {
   }
   else if (subcmd == 'expand' ||
     (subcmd === 'list' && argv.indexOf('--expand') !== -1)) {
-    var query = argv.slice(subcmd == 'expand' ? 2 : 3);
+    var pattern;
+    try {
+      pattern = new RegExp(argv.slice(subcmd == 'expand' ? 2 : 3).join(' '));
+    }
+    catch(e) {
+      response.end(e.toString());
+      return;
+    }
     var resBody = Object.keys(macros)
       .filter(function(key) {
-        return query.indexOf(key) !== -1;
+        return !pattern || pattern.test(key);
       })
       .map(function(key) {
         var macro = macros[key];
@@ -260,13 +267,23 @@ var macro = function macro(argv, message, response, config, logger) {
             macro
         });
       })
-      .join('\n');
+      .join('\n') || errMsgs.noMacros;
 
-    resBody = resBody || errMsgs.noMacros;
     response.end(resBody);
   }
   else if (subcmd === 'list') {
-    var resBody = Object.keys(macros).join(', ');
+    var pattern;
+    try {
+      pattern = new RegExp(argv.slice(2).join(' '));
+    }
+    catch(e) {
+      response.end(e.toString());
+      return;
+    }
+    var resBody = Object.keys(macros)
+      .filter(function(key) {
+        return !pattern || pattern.test(key);
+      }).join(', ') || errMsgs.noMacros;
     response.end(resBody);
   }
   else if (subcmd === 'unset') {
