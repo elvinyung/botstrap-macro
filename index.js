@@ -311,7 +311,18 @@ var macro = function macro(argv, message, response, config, logger) {
   }
   else {
     var callee = subcmd;
-    var tokens = tokenizeExpr(argv.slice(2).join(' '));
+    var tokens;
+
+    try {
+      tokens = tokenizeExpr(argv.slice(2).join(' '));
+    }
+    catch (err) {
+      logger.log(lfmt.format('Got error: {{error}}', {
+        error: err
+      }));
+      response.end(err.toString());
+    }
+
     parseTokens(tokens, callee, function(err, result) {
       if (err) {
         logger.log(lfmt.format('Got error: {{error}}', {
