@@ -343,5 +343,4 @@ var macro = function macro(argv, message, response, config, logger) {
 };
 
 macro.metadata = require('./plugin');
-
 module.exports = macro;
