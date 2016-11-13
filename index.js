@@ -48,11 +48,6 @@ var loadMacros = function loadMacros() {
         template.length > 0 ?
           (macros[name] = template) :
           (delete macros[name]);
-
-        console.log(lfmt.format('loading macro {{name}} `{{template}}`', {
-          name: name,
-          template: template
-        }));
       });
   } catch (err) {
     // log the error and clean the macros.
@@ -194,7 +189,6 @@ var unescapeLinks = function unescape(message) {
 
 var macro = function macro(argv, message, response, config, logger) {
   logger.log('macro called with message', message);
-  loadMacros();
 
   // load builtins
   macros = Object.assign(macros, builtInMacros);
@@ -340,6 +334,11 @@ var macro = function macro(argv, message, response, config, logger) {
       }
     });
   }
+};
+
+macro.setup = function(logger) {
+  loadMacros();
+  logger.log(`Loaded ${Object.keys(macros).length} macros.`);
 };
 
 macro.metadata = require('./plugin');
