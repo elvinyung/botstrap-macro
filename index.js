@@ -85,7 +85,7 @@ var removeMacro = function removeMacro(name, cb) {
 var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack) {
   var template = macros[callee];
   if (!template) {
-    cb && cb(new Error('Macro not found'));
+    cb && cb(new Error(`Macro ${callee} not found`));
     return;
   }
 
