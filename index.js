@@ -82,7 +82,7 @@ var removeMacro = function removeMacro(name, cb) {
   }
 };
 
-var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack) {
+var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack, props) {
   var template = macros[callee];
   if (!template) {
     cb && cb(new Error(`Macro ${callee} not found`));
@@ -111,7 +111,7 @@ var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack) {
     // tokenize and parse this source
     var tokens = tokenizeExpr(resultSrc);
     if (tokens.indexOf(OPENBRK) !== -1) {
-      parseTokens(tokens, 'echo', cb, callStack);
+      parseTokens(tokens, 'echo', cb, callStack, props);
     } else {
       cb(null, resultSrc);
     }
@@ -172,14 +172,14 @@ var parseTokens = function parseTokens(tokens, callee, cb, callStack, props) {
           }
           stackFrame = stack.pop();
           stackFrame.args.push(result);
-        });
+        }, callStack, props);
     }
     else {
       stackFrame.args.push(token);
     }
   }
 
-  baseApplyMacro(stackFrame.callee, stackFrame.args, cb);
+  baseApplyMacro(stackFrame.callee, stackFrame.args, cb, callStack, props);
 };
 
 var interpretExpr = function interpretExpr(expr, cb) {
@@ -323,25 +323,17 @@ var macro = function macro(argv, message, response, config, bot, logger) {
       tokens = tokenizeExpr(argv.slice(2).join(' '));
     }
     catch (err) {
-      logger.log(lfmt.format('Got error: {{error}}', {
-        error: err
-      }));
+      logger.error(`Got error: ${err}\n${err.stack}`);
       response.end(err.toString());
     }
 
     parseTokens(tokens, callee, function(err, result) {
       if (err) {
-        logger.log(lfmt.format('Got error: {{error}}', {
-          error: err
-        }));
+        logger.error(`Got error: ${err}\n${err.stack}`);
         response.end(err.toString());
       }
       else {
         var reply = result || errMsgs.emptyResponse;
-        logger.log(lfmt.format('Sending reply to {{channel}}: {{reply}}', {
-          channel: response.channel.name,
-          reply: reply
-        }));
         response.end(reply);
       }
     }, [], {
