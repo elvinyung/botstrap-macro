@@ -288,7 +288,9 @@ var macro = function macro(argv, message, response, config, bot, logger) {
     var resBody = Object.keys(macros)
       .filter(function(key) {
         return !pattern || pattern.test(key);
-      }).join(', ') || errMsgs.noMacros;
+      })
+      .map(name => (typeof macros[name] === 'function') ? `_${name}_` : name)
+      .join(', ') || errMsgs.noMacros;
     response.end(resBody);
   }
   else if (subcmd === 'unset') {
