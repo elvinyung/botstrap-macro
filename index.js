@@ -295,7 +295,7 @@ var macro = function macro(argv, message, response, config, bot, logger) {
   }
   else if (subcmd === 'unset') {
     var name = argv[2];
-    if (builtInMacros[name]) {
+    if (builtins[name]) {
       response.end(errMsgs.nameReserved);
       return;
     };
