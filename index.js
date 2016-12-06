@@ -118,7 +118,7 @@ var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack) {
   }
 };
 
-var parseTokens = function parseTokens(tokens, callee, cb, callStack) {
+var parseTokens = function parseTokens(tokens, callee, cb, callStack, props) {
   // hack: if no cb, we don't have to do anything since everything we do
   // is invisible.
   if (!cb) {
@@ -133,7 +133,9 @@ var parseTokens = function parseTokens(tokens, callee, cb, callStack) {
   var stack = [];
   var stackFrame = {
     callee: callee,
-    args: []
+    args: Object.assign([], {
+      props: props
+    })
   };
 
   callStack = callStack || [];
@@ -155,7 +157,9 @@ var parseTokens = function parseTokens(tokens, callee, cb, callStack) {
         stack.push(stackFrame);
         stackFrame = {
           callee: newCallee,
-          args: []
+          args: Object.assign([], {
+            props: props
+          })
         };
       }
     }
@@ -338,6 +342,8 @@ var macro = function macro(argv, message, response, config, bot, logger) {
         }));
         response.end(reply);
       }
+    }, [], {
+      message: message
     });
   }
 };
