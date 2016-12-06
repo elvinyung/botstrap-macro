@@ -227,7 +227,7 @@ var macro = function macro(argv, message, response, config, logger) {
             name: name,
             template: template
           });
-          response.react('+1');
+          message.react('+1');
         }
         else {
           response.endf(errMsgs.removedMacro, {
