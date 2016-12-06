@@ -1,7 +1,8 @@
 'use strict';
 
 var fs = require('fs'),
-  lfmt = require('lfmt');
+  lfmt = require('lfmt'),
+  loader = require('./lib/loader');
 
 var saveFile = process.cwd() + '/saved.macros';
 
@@ -20,8 +21,6 @@ var errMsgs = {
 For the record, it used to be \`\`\`{{template}}\`\`\``,
   unchangedMacro: 'Nothing changed.'
 };
-
-var builtInMacros = require('./lib/builtins');
 
 // TODO: Actually use tokens
 var Tokenizer = require('./lib/tokenizer');
@@ -92,9 +91,14 @@ var baseApplyMacro = function baseApplyMacro(callee, args, cb, callStack) {
 
   var result;
   if (typeof template === 'function') {
-    template.call({
-      stack: callStack
-    }, cb, args);
+    try {  // just to make sure :^)
+      template.call({
+        stack: callStack
+      }, cb, args);
+    }
+    catch (e) {
+      cb(e);
+    }
   }
   else {
     // this converts it to valid macro source.
@@ -187,11 +191,13 @@ var unescapeLinks = function unescape(message) {
   });
 };
 
-var macro = function macro(argv, message, response, config, logger) {
+var macro = function macro(argv, message, response, config, bot, logger) {
   logger.log('macro called with message', message);
 
+  let builtins = bot.injectedInvoke(loader.load);
+
   // load builtins
-  macros = Object.assign(macros, builtInMacros);
+  macros = Object.assign(macros, builtins);
 
   if (argv.length < 2) {
     logger.error('`macro` called incorrectly: ', argv.join(' '));
@@ -203,7 +209,7 @@ var macro = function macro(argv, message, response, config, logger) {
 
   if (subcmd === 'set') {
     var name = argv[2];
-    if (builtInMacros[name]) {
+    if (builtins[name]) {
       response.end(errMsgs.nameReserved);
       return;
     };
