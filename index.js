@@ -334,6 +334,11 @@ var macro = function macro(argv, message, response, config, bot, logger) {
       }
       else {
         var reply = result || errMsgs.emptyResponse;
+
+        if (!message.hasThread) {
+          response.setThread();
+        }
+
         response.end(reply);
       }
     }, [], {
