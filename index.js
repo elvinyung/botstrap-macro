@@ -347,8 +347,18 @@ var macro = function macro(argv, message, response, config, bot, logger) {
   }
 };
 
-macro.setup = function(logger) {
+macro.setup = function(logger, bot) {
   loadMacros();
+  bot.service('macroService', () => {
+    return {
+      set: (name, val) => {
+        macros[name] = val;
+      },
+      get: name => macros[name],
+      list: () => macros
+    }
+  });
+
   logger.log(`Loaded ${Object.keys(macros).length} macros.`);
 };
 
